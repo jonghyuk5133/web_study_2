@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>프로필 - Web Study</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <div class="card">
+        <!-- 아바타: 아이디 첫 글자 표시 -->
+        <div class="avatar" id="avatar">?</div>
+
+        <h1 id="welcomeMsg">로딩 중...</h1>
+        <p class="subtitle">내 계정 정보</p>
+
+        <hr class="divider" />
+
+        <div class="profile-info">
+            <div class="info-item">
+                <span class="key">아이디</span>
+                <span class="value" id="infoUsername">-</span>
+            </div>
+            <div class="info-item">
+                <span class="key">회원번호</span>
+                <span class="value" id="infoId">-</span>
+            </div>
+            <div class="info-item">
+                <span class="key">가입일</span>
+                <span class="value" id="infoCreatedAt">-</span>
+            </div>
+        </div>
+
+        <hr class="divider" />
+
+        <button class="btn btn-outline" id="logoutBtn">로그아웃</button>
+    </div>
+
+    <script>
+        // 페이지 로드 시 바로 프로필 API 호출
+        // 세션 쿠키가 없거나 만료됐으면 401 응답 → 로그인 페이지로 이동
+        async function loadProfile() {
+            const res = await fetch('/api/profile');
+
+            if (res.status === 401) {
+                // 미로그인 상태 → 로그인 페이지로 강제 이동
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const data = await res.json();
+
+            // 화면에 정보 출력
+            document.getElementById('avatar').textContent = data.username[0].toUpperCase();
+            document.getElementById('welcomeMsg').textContent = `안녕하세요, ${data.username}님!`;
+            document.getElementById('infoUsername').textContent = data.username;
+            document.getElementById('infoId').textContent = `#${data.id}`;
+            document.getElementById('infoCreatedAt').textContent = data.createdAt;
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await fetch('/api/logout', { method: 'POST' });
+            // 로그아웃 후 메인 페이지로 이동
+            window.location.href = 'index.html';
+        });
+
+        loadProfile();
+    </script>
+</body>
+
+</html>
